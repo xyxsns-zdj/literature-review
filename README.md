@@ -32,9 +32,11 @@ A Cowork AI skill that guides you through the complete 6-step literature review 
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.4.1 | 2026-05-10 | 8 interactive editing touch points: AI writes draft → user edits → AI adapts |
 | 1.3.0 | 2026-05-08 | AI performs all literature searches (WebSearch/WebFetch), presents real URLs |
 | 1.2.0 | 2026-05-08 | All user interactions use AskUserQuestion visual interface |
-| 1.1.0 | 2026-05-07 | Initial release with 6-step Galván & Galván workflow |
+| 1.1.0 | 2026-05-08 | Strict sequential execution protocol with per-step verification |
+| 1.0.0 | 2026-05-07 | Initial release with 6-step Galván & Galván workflow |
 
 ## Reference
 
