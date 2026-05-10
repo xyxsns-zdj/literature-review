@@ -1,20 +1,37 @@
 ---
-name: literature_review
-description: "Complete 6-step literature review writing workflow based on Galván & Galván (2017). Strict step-by-step execution. AI performs literature searches via WebSearch/WebFetch, presents results with real URLs. Every user interaction uses AskUserQuestion. Interactive editing boxes at 8 key touch points (outline, topic, draft sections, title). Triggers on: /literature_review, write literature review, lit review, literature review writing, systematic review."
+name: literature-review
+description: "Complete 7-step literature review writing + citation verification workflow based on Galván & Galván (2017). Strict step-by-step execution. AI performs literature searches via WebSearch/WebFetch, presents results with real URLs. Includes automated peer review (academic-paper-reviewer) and citation verification (LitSense/NCBI, Zotero import, .docx export, HTML verification report). Interactive editing boxes at 8 key touch points."
 metadata:
-  version: "1.4.1"
-  last_updated: "2026-05-08"
+  version: "2.0.0"
+  last_updated: "2026-05-10"
   status: active
   based_on: "Galván, J. L., & Galván, M. C. (2017). Writing Literature Reviews (7th ed.). Routledge."
   writing_reference: "University of Manchester Academic Phrasebank (https://www.phrasebank.manchester.ac.uk/)"
   task_type: guided
   execution_mode: strict_sequential
-  ai_capabilities: "WebSearch, WebFetch, AskUserQuestion, edit_content.py"
+  ai_capabilities: "WebSearch, WebFetch, AskUserQuestion, edit_content.py, Agent, Skill (academic-paper-reviewer), Zotero CLI, python-docx"
+  integrates_with: "academic-paper-reviewer (v3.7.0) — multi-perspective peer review; LitSense/NCBI — sentence-level literature search; Zotero — reference collection management"
 ---
 
-# Literature Review Writing — Complete 6-Step Workflow
+# Literature Review Writing — Complete 7-Step Workflow (v2.0.0)
 
 Based on **José L. Galván & Melisa C. Galván, *Writing Literature Reviews: A Guide for Students of the Social and Behavioral Sciences* (7th Edition, Routledge, 2017)**.
+
+---
+
+## 🔴 最高准则 — SUPREME RULE（必须遵守，不可逾越）
+
+> **所有内容必须基于 PubMed 或 Web of Science 收录的真实文献，严禁杜撰。**
+
+这是不可协商的底线。每一次写作或审校都必须遵守：
+
+1. **所有引用的研究、数据、作者、期刊、年份** — 必须来自 PubMed 或 Web of Science 可检索到的真实论文
+2. **禁止编造** — 禁止凭空生成论文标题、作者名、DOI、期刊卷期页码、或研究结果
+3. **每引用必验证** — 引用的每条文献都须通过 WebSearch/WebFetch 在 PubMed 或 Web of Science 上核实其真实性
+4. **存疑即标注** — 若某条文献无法在 PubMed/WoS 找到明确记录，须标记为"⚠️ 待核实"并告知用户，不得直接使用
+5. **用户提供的信息优先** — 若用户提供了具体文献，以用户提供的为准，但仍需在 PubMed/WoS 上验证
+
+> 违反本准则意味着生成不可靠的学术内容，这是不可接受的。
 
 ---
 
@@ -106,14 +123,14 @@ The AI performs ALL literature searches (Steps 2.3, 2.7, 2.8, 2.9, 2.10, 5.A2).
 
 ## Trigger Conditions
 
-**Triggers**: `/literature_review`, write literature review, lit review, literature review writing, systematic review
+**Triggers**: `/literature-review`, write literature review, lit review, literature review writing, systematic review
 
 ---
 
 ## Workflow Overview
 
 ```
-Step 1 → Step 2 → Step 3 → Step 4 → Step 5 → Step 6
+Step 1 → Step 2 → Step 3 → Step 4 → Step 5 → Step 6 → Step 7 → Step 8
 ```
 
 | Step | Name | Key Output | Editing |
@@ -124,6 +141,8 @@ Step 1 → Step 2 → Step 3 → Step 4 → Step 5 → Step 6
 | 4 | Deep Analysis | Analysis tables + summaries | — |
 | 5 | Synthesize & Write Draft | Complete first draft | TP-2~7 |
 | 6 | Edit & Finalize | Final manuscript | TP-8 |
+| 7 | Peer Review & Selective Revision | Multi-perspective review + collectively revised manuscript | — |
+| 8 | Citation Verification & Reference Mgmt | Verified references + Zotero collection + .docx + HTML report | — |
 
 ---
 
@@ -366,7 +385,214 @@ AskUserQuestion for format (Word/LaTeX/Both).
 
 ---
 
-## Quick Reference: 12 Key Principles
+## Step 7: Peer Review & Selective Revision
+
+> **New in v1.5.0**: After completing the final manuscript, this step automatically invokes the `academic-paper-reviewer` skill to conduct a multi-perspective peer review, lists every reviewer comment one by one for your selection, and applies all accepted changes collectively.
+
+**Rationale** (Galván & Galván, Ch. 12): "Seek feedback before finalizing" — automated peer review provides systematic, multi-perspective feedback that catches weaknesses you may have overlooked.
+
+### Phase A: Assemble Complete Manuscript
+
+1. **Read the final edited versions** of all manuscript sections:
+   - Title candidates file → extract your final chosen title
+   - `editing/introduction.md`
+   - `editing/section_1.md`
+   - `editing/section_2.md` (and `section_3.md`, etc. if they exist)
+   - `editing/cross_theme.md`
+   - `editing/conclusion.md`
+   - Reference list (from Step 6 Phase D)
+
+2. **Compile** the complete manuscript into a single file: `editing/manuscript_draft.md`
+   - Full title at top
+   - All sections in order
+   - References at the end
+
+3. **AskUserQuestion** to confirm the assembled manuscript:
+   ```json
+   {
+     question: "I've assembled the complete manuscript from your edited sections. The full draft is saved at `editing/manuscript_draft.md`. Shall we proceed to automated peer review?",
+     header: "Manuscript Ready",
+     options: [
+       { label: "Yes, proceed to peer review", description: "Launch multi-perspective peer review via Academic Research Skills." },
+       { label: "Let me check first", description: "I'll review the assembled draft before continuing." },
+       { label: "Skip peer review", description: "Proceed directly to final output without review." }
+     ],
+     multiSelect: false
+   }
+   ```
+   - If "Let me check first": prompt user to edit `editing/manuscript_draft.md`, then Read the file back.
+   - If "Skip peer review": jump to Phase E (Final Output).
+
+### Phase B: Launch Multi-Perspective Peer Review
+
+1. **Invoke the Academic Paper Reviewer** by spawning an Agent with the manuscript:
+   ```
+   Agent({
+     subagent_type: "general-purpose",
+     description: "Academic peer review on manuscript",
+     prompt: "You MUST load the academic-paper-reviewer skill via the Skill tool. Review the manuscript at [workspace_path]/editing/manuscript_draft.md using the 'full' mode. Simulate all 5 reviewer personas (Editor-in-Chief, 3 Peer Reviewers, Devil's Advocate). For EACH reviewer, produce individual atomic comments (one discrete issue per item) with severity labels (major/minor/typographical). Return ALL comments as a structured JSON array with fields: reviewer_name, comment_number, comment_text, severity. Do NOT skip or summarize any reviewer."
+   })
+   ```
+
+2. **Wait** for the Agent to complete and return the structured review data.
+
+3. **Verify** that all 5 reviewer perspectives were generated. If a reviewer is missing, re-invoke with an explicit instruction to include them.
+
+### Phase C: Present Comments One by One
+
+⛔ **CRITICAL**: Process comments strictly in order — one reviewer at a time, one comment at a time. Do NOT batch, skip, or summarize.
+
+1. For EACH reviewer (in fixed order: Editor-in-Chief → Peer Reviewer 1 → Peer Reviewer 2 → Peer Reviewer 3 → Devil's Advocate):
+
+2. **Announce** the reviewer header clearly:
+   > `--- Reviewer [N]: [Name] ---`
+
+3. For EACH individual comment from that reviewer:
+
+   **Present** the full comment text and use AskUserQuestion:
+   ```json
+   {
+     question: "**Reviewer [Name] — Comment #[N]**\nSeverity: [major/minor/typo]\n\n\"[Full comment text]\"\n\nDo you accept this suggestion?",
+     header: "Accept Comment?",
+     options: [
+       { label: "✅ Accept", description: "Include this change in the collective revision batch." },
+       { label: "❌ Reject", description: "Do not apply this suggestion." },
+       { label: "✏️ Modify", description: "Accept with adjustments (I'll describe the modification)." }
+     ],
+     multiSelect: false
+   }
+   ```
+
+4. **If "✏️ Modify"**: Ask the user to describe their modification. Record the modified version alongside the original.
+
+5. **Record** every decision in a running decision log table with columns: Reviewer | # | Comment Summary | Decision | Modified Version (if applicable).
+
+⛔ **STRICT RULES:**
+- Process ONE comment per AskUserQuestion call. Never bundle multiple comments.
+- Preserve the exact reviewer order listed above.
+- Do NOT reorder, merge, or split comments.
+- Do NOT let the Devil's Advocate's comments be presented differently — same format, same decision options.
+
+### Phase D: Apply Accepted Changes Collectively
+
+After ALL comments across ALL reviewers have been processed:
+
+1. **Compile** the decision log into three lists:
+   - **Accepted** (including Modified versions)
+   - **Rejected**
+   - **Total**
+
+2. **Present a summary table** to the user:
+   ```
+   📋 Review Summary
+   ─────────────────────────────────────────
+   Total comments received:     [N]
+   ✅ Accepted:                 [N]
+   ❌ Rejected:                 [N]
+   ✏️ Accepted (modified):      [N]
+   ─────────────────────────────────────────
+   ```
+
+3. **Apply all accepted and modified changes** to the manuscript at once. Save the result to `editing/manuscript_revised.md`.
+
+4. **AskUserQuestion** to confirm satisfaction:
+   ```json
+   {
+     question: "All accepted changes have been applied collectively. The revised manuscript is at `editing/manuscript_revised.md`. Are you satisfied with the result?",
+     header: "Revision Complete",
+     options: [
+       { label: "Yes, proceed to final output", description: "Move to final formatting and export." },
+       { label: "Let me make additional manual edits", description: "I'll edit the revised draft further." },
+       { label: "Request re-review", description: "Send the revised manuscript for a second round of peer review." }
+     ],
+     multiSelect: false
+   }
+   ```
+   - If "Let me make additional manual edits": prompt user to edit `editing/manuscript_revised.md`, Read back, then proceed.
+   - If "Request re-review": loop back to Phase B with the revised manuscript.
+
+### Phase E: Final Output
+
+AskUserQuestion for output format (Word/LaTeX/Both/PDF). After output, provide the final file path.
+
+### Step 7 Completion Gate — AskUserQuestion Yes/No.
+
+---
+
+## Step 8: Citation Verification & Reference Management
+
+> **New in v2.0.0**: After peer review and revision, this step analyzes citation integrity, searches LitSense (NCBI) for missing references, verifies existing citations, imports to Zotero, formats the article per journal style as a Word (.docx) document, and generates an HTML verification report with DOI links for human review.
+
+**⛔ SUPREME RULE**: All citations MUST be from real PubMed or Web of Science indexed literature. Fabrication of any reference is strictly forbidden.
+
+### Phase A: Load Manuscript & Classify Statements
+
+1. **Read the revised manuscript** from `editing/manuscript_revised.md`.
+2. **Classify every sentence** into three categories:
+   - **Cited** — contains a citation marker (e.g., `(1-3)`, `(Author, Year)`)
+   - **Needs Citation** — makes a factual/scientific claim without any citation
+   - **Structural** — transitions, framework, author's own synthesis
+3. **Present** two working lists to the user:
+   - **List A (Uncited Claims)**: factual statements needing references
+   - **List B (Existing Citations)**: all detected citation instances to verify
+4. **AskUserQuestion** to confirm both lists. Allow user to add/remove items.
+
+### Phase B: Search LitSense for Uncited Statements
+
+For EACH statement in List A:
+
+1. **Extract** 8–15 key terms from the claim.
+2. **Search PubMed/LitSense** via WebSearch/WebFetch to find real supporting references.
+3. **Present** up to 5 candidate references (with title, authors, year, journal, PMID, DOI).
+4. **AskUserQuestion** for selection (Accept / Reject / Modify / Search again).
+5. **Record** the decision. If none found, mark as "⚠️ unchecked — no PubMed match."
+
+### Phase C: Verify Existing Citations
+
+For a representative sample of List B (or all, if user chooses):
+
+1. **Extract claim + cited reference** for each citation instance.
+2. **Search PubMed/LitSense** to confirm the cited paper supports the claim.
+3. **Classify**: ✅ Confirmed / ⚠️ Questionable / ❌ Not Found.
+4. **AskUserQuestion** for action (Keep / Flag / Replace / Remove).
+5. **Record** all results. Flag any citation that cannot be verified on PubMed/WoS.
+
+### Phase D: Import to Zotero
+
+1. **Create a Zotero collection** named after the article title:
+   ```
+   zot collection create "[Article Title]"
+   ```
+2. **Compile master reference list** (existing + newly added refs, deduplicated by DOI/PMID).
+3. **Import each reference** via DOI using `zot add --doi "..."` then move to the collection.
+4. **AskUserQuestion** to confirm the import is complete.
+
+### Phase E: Format & Export as Word (.docx)
+
+1. **Detect target journal style** from the manuscript (APA, Vancouver, GB/T 7714, IEEE, etc.).
+2. **Insert all in-text citations** — both newly added (Phase B) and existing verified ones.
+3. **Format reference list** per the detected style, sorted correctly.
+4. **AskUserQuestion** to confirm the formatting.
+5. **Generate .docx** using python-docx:
+   ```
+   python3 -c "from docx import Document; doc=Document(); ..."
+   ```
+   Include: centered title, section headings, body text (Times New Roman 12pt), page break before references.
+6. Save to `editing/formatted_article.docx`.
+
+### Phase F: Generate HTML Verification Report
+
+1. **Build** a structured dataset with fields: Statement | Section | Status | Citation | Reference | DOI.
+2. **Generate** a standalone HTML file saved to `editing/citation_verification_report.html` with:
+   - Summary statistics cards (Verified/Newly Added/Corrected/Total)
+   - Color-coded statement-to-reference mapping table (🟢 Verified / 🟡 Newly Added / 🔴 Corrected)
+   - Clickable DOI links opening in new tabs
+   - Deliverables listing
+3. **AskUserQuestion** for final confirmation and output preferences.
+
+### Step 8 Completion Gate — AskUserQuestion Yes/No.
+
+## Quick Reference: 14 Key Principles
 
 1. **Broad to narrow** — start wide, iteratively focus (Ch. 3)
 2. **Skim before you read** — structural preview (Ch. 4)
@@ -380,9 +606,12 @@ AskUserQuestion for format (Word/LaTeX/Both).
 10. **Zotero throughout** (Ch. 4, 13)
 11. **Use the Manchester Phrasebank**
 12. **Seek feedback before finalizing** (Ch. 12)
+13. **Use automated peer review** — multi-perspective review with selective revision (v1.5.0)
+14. **Verify every citation** — LitSense search, Zotero import, .docx export, HTML report (v2.0.0)
 
 ---
 
-> 🎉 v1.4.1: 8 interactive editing touch points (outline added). AI writes → user edits → AI adapts.
+> 🎉 v2.0.0: Step 7 — Peer Review & Selective Revision + Step 8 — Citation Verification & Reference Management. After peer review, analyzes citation integrity via LitSense, imports to Zotero, exports formatted .docx, and generates HTML verification report with DOI links.
 > 🔍 AI performs all literature searches via WebSearch/WebFetch with real URLs.
 > 🖱️ All decisions use AskUserQuestion visual interface.
+> 🔴 SUPREME RULE: All citations must be from real PubMed/Web of Science literature — fabrication strictly forbidden.
