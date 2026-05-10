@@ -1,8 +1,8 @@
 ---
 name: literature_review
-description: "Complete 6-step literature review writing workflow based on Galván & Galván (2017). Strict step-by-step execution. AI performs literature searches via WebSearch/WebFetch, presents results with real URLs. Every user interaction uses AskUserQuestion. Interactive editing boxes at key touch points (topic, draft sections, title). Triggers on: /literature_review, write literature review, lit review, literature review writing, systematic review."
+description: "Complete 6-step literature review writing workflow based on Galván & Galván (2017). Strict step-by-step execution. AI performs literature searches via WebSearch/WebFetch, presents results with real URLs. Every user interaction uses AskUserQuestion. Interactive editing boxes at 8 key touch points (outline, topic, draft sections, title). Triggers on: /literature_review, write literature review, lit review, literature review writing, systematic review."
 metadata:
-  version: "1.4.0"
+  version: "1.4.1"
   last_updated: "2026-05-08"
   status: active
   based_on: "Galván, J. L., & Galván, M. C. (2017). Writing Literature Reviews (7th ed.). Routledge."
@@ -27,8 +27,8 @@ This skill MUST be executed **step by step, one step at a time**. The AI model i
 - ❌ Proceeding to the next step without the user's explicit confirmation
 - ❌ Assuming the user has completed a step without asking for evidence/output
 - ❌ Jumping ahead to later steps
-- ❌ Shortcutting the process because "the user seems experienced"
-- ❌ Asking questions in plain text instead of using the AskUserQuestion tool
+- ❌ Shortcutting the process
+- ❌ Asking questions in plain text instead of using AskUserQuestion
 - ❌ Telling the user to "go search for X yourself"
 - ❌ Skipping the edit_content.py editing cycle at any marked touch point
 
@@ -50,36 +50,37 @@ This skill MUST be executed **step by step, one step at a time**. The AI model i
 3. **Open-ended responses**: Include "I'll type my answer" option
 4. **Confirmation gates**: "Yes, proceed" + "Not yet"
 
-Group up to 4 related questions per call. Sequential questions must be asked one at a time.
+Group up to 4 related questions per call.
 
 ---
 
-## 📝 MANDATORY: Interactive Content Editing Protocol (v1.4.0)
+## 📝 MANDATORY: Interactive Content Editing Protocol (v1.4.1)
 
-**CRITICAL**: At 7 key writing touch points, the user must edit content directly before the skill proceeds.
+**CRITICAL**: At 8 key writing touch points, the user must edit content directly before the skill proceeds.
 
 ### Editing cycle:
 
 ```
 1. AI writes/assembles content
 2. AI saves content to editing/[step]_[title].md in the workspace
-3. AI tells user: "✏️ Interactive Edit — [section name] — File: editing/[name].md"
-4. User opens, edits, saves (directly or via: python3 edit_content.py --title "..." --file "...")
+3. AI prompts: "✏️ Interactive Edit — [section name] — File: editing/[name].md"
+4. User opens, edits, saves (directly or via: python3 edit_content.py)
 5. AI Reads the modified file
 6. AI continues with user's revised content
 ```
 
-### ⛔ Seven Editing Touch Points:
+### ⛔ Eight Editing Touch Points:
 
 | TP | Step | Content | File |
 |----|------|---------|------|
 | TP-1 | 2.12 | Topic statement draft | `editing/topic_statement.md` |
-| TP-2 | 5.C | Thematic section 1 | `editing/section_1.md` |
-| TP-3 | 5.C | Thematic section 2 | `editing/section_2.md` |
-| TP-4 | 5.C | Cross-theme synthesis | `editing/cross_theme.md` |
-| TP-5 | 5.C | Conclusion | `editing/conclusion.md` |
-| TP-6 | 5.C | Introduction | `editing/introduction.md` |
-| TP-7 | 6.C | Title candidates (3 versions) | `editing/title_candidates.md` |
+| TP-2 | 5.B5 | **Detailed outline** | `editing/outline.md` |
+| TP-3 | 5.C | Thematic section 1 | `editing/section_1.md` |
+| TP-4 | 5.C | Thematic section 2 | `editing/section_2.md` |
+| TP-5 | 5.C | Cross-theme synthesis | `editing/cross_theme.md` |
+| TP-6 | 5.C | Conclusion | `editing/conclusion.md` |
+| TP-7 | 5.C | Introduction | `editing/introduction.md` |
+| TP-8 | 6.C | Title candidates (3 versions) | `editing/title_candidates.md` |
 
 After each edit, the AI MUST Read the file back and adapt all subsequent content.
 
@@ -121,8 +122,8 @@ Step 1 → Step 2 → Step 3 → Step 4 → Step 5 → Step 6
 | 2 | Select & Refine Topic | Topic statement + literature pool | TP-1 |
 | 3 | Screen & Import to Zotero | Screening table + Zotero library | — |
 | 4 | Deep Analysis | Analysis tables + summaries | — |
-| 5 | Synthesize & Write Draft | Complete first draft | TP-2~6 |
-| 6 | Edit & Finalize | Final manuscript | TP-7 |
+| 5 | Synthesize & Write Draft | Complete first draft | TP-2~7 |
+| 6 | Edit & Finalize | Final manuscript | TP-8 |
 
 ---
 
@@ -190,7 +191,7 @@ Narrow (>500 results): AskUserQuestion multiSelect (population, time frame, meth
 
 Template: *"This review examines [topic/focus], focusing on [scope]. It aims to [purpose], which is significant because [reason]."*
 
-After the draft is assembled, the AI writes it to `editing/topic_statement.md` and MUST prompt:
+After the draft is assembled, AI writes to `editing/topic_statement.md` and MUST prompt:
 
 > ✏️ **Interactive Edit — Topic Statement**
 > File: `editing/topic_statement.md`
@@ -272,7 +273,22 @@ Integration Tables + 300-500 word summaries. AskUserQuestion.
 **B2** — AskUserQuestion for patterns (multiSelect: consistent, contradictory, method-finding, theory-finding, cross-category).
 **B3** — Gap ranking.
 **B4** — AskUserQuestion for organizational scheme (thematic/chronological/methodological/theoretical/hybrid).
-**B5** — Detailed outline.
+**B5** — Build detailed outline — ⛔ **TP-2: Interactive Edit — Outline**
+
+After assembling the outline (section titles, sub-themes, key points per section, thesis statement position), the AI writes it to `editing/outline.md` and MUST prompt:
+
+> ✏️ **Interactive Edit — Outline**
+>
+> I've drafted the review outline based on your chosen organizational scheme and identified themes. This is the blueprint for the entire review — getting it right now saves massive rewriting later.
+>
+> **File**: `editing/outline.md`
+> **WSL**: `python3 edit_content.py --title "Review Outline" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/outline.md"`
+>
+> Check: section order, sub-theme groupings, whether any important themes are missing, thesis statement placement. Rearrange, add, or remove sections as needed.
+
+After user confirms, Read the file back. The revised outline becomes the mandatory structure for all subsequent writing.
+
+**⛔ CRITICAL**: Do NOT start writing any draft section until the outline has been edited and approved.
 
 ### Phase C: Write First Draft (Chapter 10) — ⛔ 5 EDITING TOUCH POINTS
 
@@ -280,25 +296,25 @@ Integration Tables + 300-500 word summaries. AskUserQuestion.
 > ⛔ FORBIDDEN: "Smith (2020) found..."
 > ✅ CORRECT: "Regarding [Theme X], research consistently indicates [finding]..."
 
-Writing order: Thematic sections → Cross-theme → Conclusion → Introduction last.
+Writing follows the approved outline. Order: Thematic sections → Cross-theme → Conclusion → Introduction last.
 
-After EACH section below, the AI writes the content to file, prompts user to edit, reads back the revised version:
+After EACH section, AI writes to file, prompts user to edit, reads back revised version:
 
 ---
 
-**TP-2 — Thematic Section 1**:
+**TP-3 — Thematic Section 1**:
 > ✏️ File: `editing/section_1.md` | WSL: `python3 edit_content.py --title "Section 1" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/section_1.md"`
 
-**TP-3 — Thematic Section 2** (and 3+):
+**TP-4 — Thematic Section 2** (and 3+):
 > ✏️ File: `editing/section_2.md` | Same pattern.
 
-**TP-4 — Cross-Theme Synthesis**:
+**TP-5 — Cross-Theme Synthesis**:
 > ✏️ File: `editing/cross_theme.md` | WSL: `python3 edit_content.py --title "Cross-Theme" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/cross_theme.md"`
 
-**TP-5 — Conclusion**:
+**TP-6 — Conclusion**:
 > ✏️ File: `editing/conclusion.md` | WSL: `python3 edit_content.py --title "Conclusion" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/conclusion.md"`
 
-**TP-6 — Introduction** (written last):
+**TP-7 — Introduction** (written last):
 > ✏️ File: `editing/introduction.md` | WSL: `python3 edit_content.py --title "Introduction" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/introduction.md"`
 
 ---
@@ -329,7 +345,7 @@ Read entire manuscript without marking. Walk through 48 items (5 dimensions) via
 
 Three rounds: Macro → Meso → Micro. AskUserQuestion.
 
-### Phase C: Refine Final Title — ⛔ TP-7
+### Phase C: Refine Final Title — ⛔ TP-8
 
 > ✏️ **Interactive Edit — Title Candidates**
 > File: `editing/title_candidates.md`
@@ -367,6 +383,6 @@ AskUserQuestion for format (Word/LaTeX/Both).
 
 ---
 
-> 🎉 v1.4.0: 7 interactive editing touch points via edit_content.py. AI writes → user edits → AI adapts.
+> 🎉 v1.4.1: 8 interactive editing touch points (outline added). AI writes → user edits → AI adapts.
 > 🔍 AI performs all literature searches via WebSearch/WebFetch with real URLs.
 > 🖱️ All decisions use AskUserQuestion visual interface.
