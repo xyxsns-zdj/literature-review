@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] — 2026-05-11
+
+### Added
+
+- **sci_lib/ subdirectory** with two powerful Python scripts:
+  - `sci_lib/sci_search.py` — multi-source academic paper search tool (arXiv API, PubMed E-utilities, Web of Science Starter API). Returns results with journal impact factors, JCR partitioning, and times-cited counts. Pure stdlib Python, no pip dependencies required.
+  - `sci_lib/zotero.py` — full Zotero Web API v3 CLI with 14 commands: items, search, get, collections, collection-create, collection-add, tags, children, add-doi (with `--collection` flag), add-isbn, add-pmid, check-pdfs, crossref, find-dois, fetch-pdfs. Requires ZOTERO_API_KEY and ZOTERO_USER_ID.
+  - `sci_lib/journal_db.json` — journal metrics database with IF, JCR, and CAS partitioning for 17 journals.
+  - `sci_lib/__init__.py` — package marker.
+
+- **Environment Variables section** in SKILL.md documenting WOS_API_KEY, ZOTERO_API_KEY, ZOTERO_USER_ID, and ZOTERO_GROUP_ID.
+
+### Changed
+
+- **SKILL.md frontmatter**: Updated `ai_capabilities` and `integrates_with` to include sci_lib scripts. Bumped version to 2.1.0.
+- **AI-Led Literature Search Protocol**: Now offers two search methods — WebSearch (default) and Multi-Source API Search via sci_search.py.
+- **Step 2 Phase A Step 3**: Added option to use `sci_lib/sci_search.py` for multi-source API search with Bash command template.
+- **Step 3 Phase D (Zotero Import)**: Replaced abstract placeholder with concrete `sci_lib/zotero.py` CLI commands.
+- **Step 8 Phase D (Zotero Import)**: Replaced abstract `zot` commands with real `sci_lib/zotero.py` commands including `--collection` flag.
+- **_meta.json**: Version bumped to 2.1.0. Added capabilities list and scripts references.
+- **upload_to_github.bat**: Added `sci_lib/` to git add path.
+
+### Fixed
+
+- **journal_db.json path**: sci_search.py now correctly resolves JOURNAL_DB_PATH to sibling journal_db.json inside sci_lib/.
+
+### Technical Notes
+- Both scripts are pure Python 3 stdlib — no pip install needed.
+- Cross-platform (Windows, macOS, Linux).
+- arXiv and PubMed work without any API key; Web of Science requires WOS_API_KEY.
+
+---
+
 ## [1.1.0] — 2026-05-08
 
 ### ⛔ Major Change — Strict Sequential Execution Protocol

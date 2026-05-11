@@ -1,5 +1,20 @@
 {
   "slug": "literature-review",
-  "version": "1.4.1",
-  "publishedAt": 1746787200000
+  "version": "2.1.0",
+  "publishedAt": 1746950400000,
+  "description": "Complete 7-step literature review writing workflow with multi-source API literature search (arXiv, PubMed, Web of Science via sci_lib/sci_search.py), real Zotero Web API v3 integration (sci_lib/zotero.py), automated peer review, and citation verification.",
+  "capabilities": [
+    "multi-source-api-search",
+    "zotero-web-api",
+    "journal-metrics-enrichment",
+    "arxiv-search",
+    "pubmed-search",
+    "web-of-science-search",
+    "citation-verification",
+    "peer-review"
+  ],
+  "scripts": {
+    "search": "python3 sci_lib/sci_search.py",
+    "zotero": "python3 sci_lib/zotero.py"
+  }
 }

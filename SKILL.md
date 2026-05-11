@@ -1,16 +1,16 @@
 ---
 name: literature-review
-description: "Complete 7-step literature review writing + citation verification workflow based on Galván & Galván (2017). Strict step-by-step execution. AI performs literature searches via WebSearch/WebFetch, presents results with real URLs. Includes automated peer review (academic-paper-reviewer) and citation verification (LitSense/NCBI, Zotero import, .docx export, HTML verification report). Interactive editing boxes at 8 key touch points."
+description: "Complete 7-step literature review writing + citation verification workflow based on Galván & Galván (2017). Strict step-by-step execution. Features multi-source API literature search (arXiv, PubMed, Web of Science via sci_lib/sci_search.py) and real Zotero Web API v3 integration (sci_lib/zotero.py). Includes automated peer review (academic-paper-reviewer) and citation verification (LitSense/NCBI, Zotero import, .docx export, HTML verification report). Interactive editing boxes at 8 key touch points."
 metadata:
-  version: "2.0.0"
-  last_updated: "2026-05-10"
+  version: "2.1.0"
+  last_updated: "2026-05-11"
   status: active
   based_on: "Galván, J. L., & Galván, M. C. (2017). Writing Literature Reviews (7th ed.). Routledge."
   writing_reference: "University of Manchester Academic Phrasebank (https://www.phrasebank.manchester.ac.uk/)"
   task_type: guided
   execution_mode: strict_sequential
-  ai_capabilities: "WebSearch, WebFetch, AskUserQuestion, edit_content.py, Agent, Skill (academic-paper-reviewer), Zotero CLI, python-docx"
-  integrates_with: "academic-paper-reviewer (v3.7.0) — multi-perspective peer review; LitSense/NCBI — sentence-level literature search; Zotero — reference collection management"
+  ai_capabilities: "WebSearch, WebFetch, AskUserQuestion, edit_content.py, Agent, Skill (academic-paper-reviewer), sci_lib/sci_search.py, sci_lib/zotero.py, python-docx"
+  integrates_with: "academic-paper-reviewer (v3.7.0) — multi-perspective peer review; LitSense/NCBI — sentence-level literature search; Zotero — reference collection management; sci_lib/sci_search.py — multi-source API search (arXiv, PubMed, WoS); sci_lib/zotero.py — Zotero Web API v3 CLI"
 ---
 
 # Literature Review Writing — Complete 7-Step Workflow (v2.0.0)
@@ -32,6 +32,38 @@ Based on **José L. Galván & Melisa C. Galván, *Writing Literature Reviews: A 
 5. **用户提供的信息优先** — 若用户提供了具体文献，以用户提供的为准，但仍需在 PubMed/WoS 上验证
 
 > 违反本准则意味着生成不可靠的学术内容，这是不可接受的。
+
+---
+
+## 🔧 Environment Variables
+
+The following environment variables enable API-based literature search and Zotero integration. Set them in `~/.claude/settings.local.json` or your shell profile.
+
+### Literature Search (sci_lib/sci_search.py)
+- `WOS_API_KEY` — Web of Science Starter API key.
+  - **Required for**: Web of Science search (optional; arXiv and PubMed work without it)
+  - **Get one**: https://developer.clarivate.com/apis/wos-starter (free tier available)
+  - **Usage**: `python3 sci_lib/sci_search.py "<query>" --source wos`
+
+### Zotero Integration (sci_lib/zotero.py)
+- `ZOTERO_API_KEY` — Zotero API key.
+  - **Required for**: All `sci_lib/zotero.py` commands
+  - **Get one**: https://www.zotero.org/settings/keys/new
+- `ZOTERO_USER_ID` — Your Zotero numeric user ID.
+  - **Required for**: Personal library access
+  - **Find it**: https://www.zotero.org/settings/keys (displayed at the top)
+- `ZOTERO_GROUP_ID` — Zotero group ID (alternative to USER_ID for group libraries).
+  - **Optional**: Use instead of `ZOTERO_USER_ID` for shared group libraries
+
+### Verification
+To test configuration:
+```bash
+# Test sci_search.py (PubMed search, no API key needed)
+python3 sci_lib/sci_search.py "test query" --source pubmed --limit 2
+
+# Test zotero.py (requires API key + user ID)
+python3 sci_lib/zotero.py items --limit 5
+```
 
 ---
 
@@ -117,7 +149,17 @@ After each edit, the AI MUST Read the file back and adapt all subsequent content
 
 The AI performs ALL literature searches (Steps 2.3, 2.7, 2.8, 2.9, 2.10, 5.A2).
 
-**Protocol**: Confirm parameters (AskUserQuestion) → Execute WebSearch → Present 5-10 results with real URLs (AskUserQuestion) → WebFetch details → Record selections.
+Two search methods are available:
+
+### Option A: WebSearch (default)
+Standard web search via the WebSearch/WebFetch tools. Works for any topic without configuration.
+
+### Option B: Multi-Source API Search (recommended)
+Uses `sci_lib/sci_search.py` to search arXiv, PubMed, and Web of Science (if WOS_API_KEY is set) simultaneously. Results include journal impact factors, JCR partitioning, and times-cited counts — providing richer context for literature selection.
+
+AI should offer the user both options via AskUserQuestion at the first search opportunity (Step 2.3). If the user has no preference, select Option B (API Search) for academic rigor.
+
+**Protocol**: Confirm parameters (AskUserQuestion) → Execute search (WebSearch or sci_search.py) → Present 5-10 results with real URLs via AskUserQuestion → WebFetch/API details → Record selections.
 
 ---
 
@@ -189,7 +231,17 @@ AskUserQuestion({ questions: [{ question: "Which type of literature review are y
 
 **Step 1** — AskUserQuestion for general topic + motivation.
 **Step 2** — AskUserQuestion for database access (multiSelect: institutional, Google Scholar, PubMed, no preference).
-**Step 3** — AskUserQuestion for keywords. AI runs WebSearch. Present 8 papers with real URLs via AskUserQuestion.
+**Step 3** — AskUserQuestion for keywords. Offer the user two search options:
+   - **Option A: WebSearch** — AI performs web-based search
+   - **Option B: Multi-Source API Search (recommended)** — Uses `sci_lib/sci_search.py` to search arXiv + PubMed + Web of Science simultaneously with journal metrics
+
+   If Option B is chosen, execute via Bash:
+   ```bash
+   python3 sci_lib/sci_search.py "<keywords>" --source all --limit 10
+   ```
+   If WOS_API_KEY is not set, the tool skips Web of Science gracefully.
+
+   Present 8-10 papers with real URLs, impact factors, and JCR rankings via AskUserQuestion.
 
 ### Phase B: Adjust Scope (Steps 4–6)
 
@@ -245,7 +297,36 @@ After user confirms, Read the file back and use revised statement.
 
 ### Phase D: Import into Zotero
 
-**Steps 5-6** — Collection structure, import, consistency. AskUserQuestion.
+**Steps 5-6** — Collection structure, import, consistency.
+
+When importing articles into Zotero (requires ZOTERO_API_KEY and ZOTERO_USER_ID environment variables):
+
+1. **For each article**, add it by DOI or PMID using `sci_lib/zotero.py`:
+   ```bash
+   # Add by DOI (most common)
+   python3 sci_lib/zotero.py add-doi "10.xxxx/xxxxx"
+
+   # Add by PubMed ID (if DOI is unavailable)
+   python3 sci_lib/zotero.py add-pmid "12345678"
+   ```
+
+2. **Organize into collections**:
+   ```bash
+   python3 sci_lib/zotero.py collection-create "[Collection Name]"
+   ```
+
+3. **Verify the import**:
+   ```bash
+   python3 sci_lib/zotero.py items --limit 50
+   ```
+
+4. **Check for PDF attachments** (optional):
+   ```bash
+   python3 sci_lib/zotero.py check-pdfs
+   python3 sci_lib/zotero.py fetch-pdfs
+   ```
+
+5. **AskUserQuestion** to confirm completeness before proceeding.
 
 ### Phase E: Organization Check
 
@@ -560,12 +641,39 @@ For a representative sample of List B (or all, if user chooses):
 ### Phase D: Import to Zotero
 
 1. **Create a Zotero collection** named after the article title:
+   ```bash
+   python3 sci_lib/zotero.py collection-create "[Article Title]"
    ```
-   zot collection create "[Article Title]"
-   ```
+   Note the returned collection key (e.g., `ABC123`).
+
 2. **Compile master reference list** (existing + newly added refs, deduplicated by DOI/PMID).
-3. **Import each reference** via DOI using `zot add --doi "..."` then move to the collection.
-4. **AskUserQuestion** to confirm the import is complete.
+
+3. **Import each reference** via DOI or PMID:
+   ```bash
+   # Add each reference to the specified collection
+   python3 sci_lib/zotero.py add-doi "10.xxxx/xxxxx" --collection "ABC123"
+
+   # Or add by PubMed ID
+   python3 sci_lib/zotero.py add-pmid "12345678"
+   ```
+
+   For books or book chapters, use ISBN:
+   ```bash
+   python3 sci_lib/zotero.py add-isbn "978-xxxx"
+   ```
+
+4. **Verify import**:
+   ```bash
+   python3 sci_lib/zotero.py items --limit 50
+   ```
+
+5. **AskUserQuestion** to confirm the import is complete.
+
+6. **Optional**: Search for missing DOIs or fetch open-access PDFs:
+   ```bash
+   python3 sci_lib/zotero.py find-dois
+   python3 sci_lib/zotero.py fetch-pdfs
+   ```
 
 ### Phase E: Format & Export as Word (.docx)
 

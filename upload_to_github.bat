@@ -35,7 +35,7 @@ if %errorlevel% neq 0 (
 
 :: Add all files
 echo [2/3] Adding files...
-git add README.md SKILL.md CHANGELOG.md LICENSE .gitignore examples/ references/
+git add README.md SKILL.md CHANGELOG.md LICENSE .gitignore examples/ references/ sci_lib/
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to add files.
     pause
