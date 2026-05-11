@@ -1,16 +1,16 @@
 ---
 name: literature-review
-description: "Complete 7-step literature review writing + citation verification workflow based on Galván & Galván (2017). Strict step-by-step execution. Features multi-source API literature search (arXiv, PubMed, Web of Science via sci_lib/sci_search.py) and real Zotero Web API v3 integration (sci_lib/zotero.py). Includes automated peer review (academic-paper-reviewer) and citation verification (LitSense/NCBI, Zotero import, .docx export, HTML verification report). Interactive editing boxes at 8 key touch points."
+description: "Complete 7-step literature review writing + citation verification workflow based on Galván & Galván (2017). Strict step-by-step execution. Features multi-source API literature search (arXiv, PubMed, Web of Science via sci_lib/sci_search.py) and real Zotero Web API v3 integration (sci_lib/zotero.py). Includes automated peer review (academic-paper-reviewer) and citation verification (LitSense/NCBI, Zotero import, .docx export, HTML verification report). Interactive editing boxes at 8 key touch points. ALL writing MUST use the Academic Phrasebank corpus (phrasebank/phrasebank_full.md) — every sentence must be constructed from or inspired by its phraseological templates."
 metadata:
-  version: "2.1.0"
+  version: "2.2.0"
   last_updated: "2026-05-11"
   status: active
   based_on: "Galván, J. L., & Galván, M. C. (2017). Writing Literature Reviews (7th ed.). Routledge."
-  writing_reference: "University of Manchester Academic Phrasebank (https://www.phrasebank.manchester.ac.uk/)"
+  writing_reference: "Academic Phrasebank corpus (phrasebank/phrasebank_full.md) — Dr John Morley, University of Manchester, 2023 Enhanced Edition"
   task_type: guided
   execution_mode: strict_sequential
-  ai_capabilities: "WebSearch, WebFetch, AskUserQuestion, edit_content.py, Agent, Skill (academic-paper-reviewer), sci_lib/sci_search.py, sci_lib/zotero.py, python-docx"
-  integrates_with: "academic-paper-reviewer (v3.7.0) — multi-perspective peer review; LitSense/NCBI — sentence-level literature search; Zotero — reference collection management; sci_lib/sci_search.py — multi-source API search (arXiv, PubMed, WoS); sci_lib/zotero.py — Zotero Web API v3 CLI"
+  ai_capabilities: "WebSearch, WebFetch, AskUserQuestion, edit_content.py, Agent, Skill (academic-paper-reviewer), sci_lib/sci_search.py, sci_lib/zotero.py, python-docx, Read(phrasebank/phrasebank_full.md)"
+  integrates_with: "academic-paper-reviewer (v3.7.0) — multi-perspective peer review; LitSense/NCBI — sentence-level literature search; Zotero — reference collection management; sci_lib/sci_search.py — multi-source API search (arXiv, PubMed, WoS); sci_lib/zotero.py — Zotero Web API v3 CLI; phrasebank/phrasebank_full.md — Academic Phrasebank corpus (mandatory writing reference)"
 ---
 
 # Literature Review Writing — Complete 7-Step Workflow (v2.0.0)
@@ -32,6 +32,39 @@ Based on **José L. Galván & Melisa C. Galván, *Writing Literature Reviews: A 
 5. **用户提供的信息优先** — 若用户提供了具体文献，以用户提供的为准，但仍需在 PubMed/WoS 上验证
 
 > 违反本准则意味着生成不可靠的学术内容，这是不可接受的。
+
+---
+
+## 📖 Academic Phrasebank — 强制语料库规定 (MANDATORY)
+
+> **所有写作语句必须优先从 phrasebank 语料库中调取句式。**
+
+这是不可协商的写作规定。每一次撰写综述都必须遵守：
+
+1. **写作前必须先读取语料库** — 在 Step 5 开始撰写前，AI 必须先通过 Read 工具读取 `phrasebank/phrasebank_full.md` 的完整内容
+2. **所有语句必须基于 phrasebank** — 每一个句子都必须直接从短语库中选择或改编自其 phraseological templates，不得自行编造学术英语表达
+3. **按章节匹配语料** — 根据正在撰写的综述章节，从对应的 phrasebank 部分调取：
+   - 引言 → "Introducing Work" (page 8)
+   - 文献综述 → "Reviewing the Literature" (page 33)
+   - 方法 → "Describing Methods" (page 48)
+   - 结果 → "Reporting Results" (page 58)
+   - 讨论 → "Discussing Findings" (page 66)
+   - 结论 → "Writing Conclusions" (page 74)
+4. **通用功能调用** — 以下跨章节功能必须从对应部分调取：
+   - 表示谨慎/ hedging → "Being Cautious"
+   - 表示批评 → "Being Critical"
+   - 分类与列举 → "Classifying and Listing"
+   - 比较与对比 → "Comparing and Contrasting"
+   - 定义术语 → "Defining Terms"
+   - 描述趋势 → "Describing Trends"
+   - 解释因果关系 → "Explaining Causality"
+   - 举例支持 → "Giving Examples as Support"
+   - 信号过渡 → "Signalling Transition"
+5. **词汇表调用** — 连接词从 "Words and Phrases for Connecting Ideas" 调取；动词选择优先使用 "Commonly Used Verbs" 列表
+
+**Source**: Dr John Morley, *Academic Phrasebank: A Compendium of Commonly Used Phrasal Elements in Academic English* (2023 Enhanced Edition, PDF). University of Manchester. © 2023 John Morley.
+
+**本地语料库文件**: `phrasebank/phrasebank_full.md` (9,416 行, ~313KB, 从 PDF 提取的完整文本)
 
 ---
 
@@ -359,7 +392,7 @@ Integration Tables + 300-500 word summaries. AskUserQuestion.
 ## Step 5: Synthesize Trends, Write Draft & Develop Coherent Essay
 
 > **Book Reference**: Chapters 9–11
-> **Writing Reference**: [Manchester Academic Phrasebank](https://www.phrasebank.manchester.ac.uk/)
+> **Writing Reference**: Academic Phrasebank (local corpus at `phrasebank/phrasebank_full.md`) — ALL writing must use its phraseological templates
 
 ### Phase A: Journal-Specific (Journal Reviews Only)
 
@@ -395,6 +428,8 @@ After user confirms, Read the file back. The revised outline becomes the mandato
 **CRITICAL RULE:**
 > ⛔ FORBIDDEN: "Smith (2020) found..."
 > ✅ CORRECT: "Regarding [Theme X], research consistently indicates [finding]..."
+>
+> **🏛️ Phrasebank Mandate**: Before writing ANY section, AI MUST first Read `phrasebank/phrasebank_full.md` to load the relevant phraseological templates. EVERY sentence in the draft must be constructed from or adapted from the phrasebank corpus — no ad-hoc academic English expressions. Match the section to the corresponding phrasebank chapter (Introducing Work, Reviewing the Literature, etc.). Use "Being Cautious" for hedging, "Comparing and Contrasting" for comparisons, "Signalling Transition" for flow, and "Commonly Used Verbs" for verb choices.
 
 Writing follows the approved outline. Order: Thematic sections → Cross-theme → Conclusion → Introduction last.
 

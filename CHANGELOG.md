@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] — 2026-05-11
+
+### Added
+
+- **Academic Phrasebank corpus** (`phrasebank/` directory):
+  - `phrasebank/phrasebank_full.md` — Full text extraction (9,416 lines, ~313KB) from the University of Manchester Academic Phrasebank (2023 Enhanced Edition, Dr John Morley)
+  - `phrasebank/Academic-Phrasebank-Navigable-PDF-2023.pdf` — Original PDF (3.5MB)
+- **📖 Mandatory Phrasebank Section** in SKILL.md — a new top-level mandate requiring ALL writing to prioritize phrasebank templates over ad-hoc academic expressions
+- **Step 5 Critical Rule** updated with Phrasebank Mandate: AI must Read phrasebank_full.md before writing, and every sentence must be constructed from its phraseological templates
+
+### Changed
+
+- **SKILL.md frontmatter**: Bumped to v2.2.0. Updated writing_reference to local phrasebank corpus. Added Read(phrasebank/phrasebank_full.md) to ai_capabilities.
+- **Writing Reference**: Changed from external URL to local `phrasebank/phrasebank_full.md`
+- **_meta.json**: Version bumped to 2.2.0
+
+### Technical Notes
+- The phrasebank is organized by rhetorical function: Introducing Work, Reviewing the Literature, Describing Methods, Reporting Results, Discussing Findings, Writing Conclusions (major sections) plus Being Cautious, Being Critical, Comparing and Contrasting, etc. (general functions)
+- AI must Read the relevant phrasebank section BEFORE writing each manuscript section
+- Every sentence in the review draft must be based on a phrasebank template
+
+---
+
 ## [2.1.0] — 2026-05-11
 
 ### Added
