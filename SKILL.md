@@ -9,7 +9,7 @@ metadata:
   writing_reference: "Academic Phrasebank corpus (phrasebank/phrasebank_full.md) — Dr John Morley, University of Manchester, 2023 Enhanced Edition"
   task_type: guided
   execution_mode: strict_sequential
-  ai_capabilities: "WebSearch, WebFetch, AskUserQuestion, edit_content.py, Agent, Skill (academic-paper-reviewer), sci_lib/sci_search.py, sci_lib/zotero.py, python-docx, Read(phrasebank/phrasebank_full.md)"
+  ai_capabilities: "WebSearch, WebFetch, AskUserQuestion, edit_content.py, review_editor.py, Agent, Skill (academic-paper-reviewer), sci_lib/sci_search.py, sci_lib/zotero.py, python-docx, Read(phrasebank/phrasebank_full.md)"
   integrates_with: "academic-paper-reviewer (v3.7.0) — multi-perspective peer review; LitSense/NCBI — sentence-level literature search; Zotero — reference collection management; sci_lib/sci_search.py — multi-source API search (arXiv, PubMed, WoS); sci_lib/zotero.py — Zotero Web API v3 CLI; phrasebank/phrasebank_full.md — Academic Phrasebank corpus (mandatory writing reference)"
 ---
 
@@ -145,10 +145,33 @@ Group up to 4 related questions per call.
 ```
 1. AI writes/assembles content
 2. AI saves content to editing/[step]_[title].md in the workspace
-3. AI prompts: "✏️ Interactive Edit — [section name] — File: editing/[name].md"
-4. User opens, edits, saves (directly or via: python3 edit_content.py)
-5. AI Reads the modified file
-6. AI continues with user's revised content
+3. AI launches review_editor.py (browser-based) — a rich editor page pops up
+4. User edits inline, annotates, deletes sections in the browser
+5. User clicks "Save & Close" — content saved back to file, server shuts down
+6. AI Reads the modified file
+7. AI continues with user's revised content
+```
+
+### Two Editing Methods
+
+**Method A: 🖥️ Browser Editor (recommended)** — `review_editor.py`
+A rich WYSIWYG editor that opens in your browser. Features:
+- **Inline editing** — click any paragraph to edit directly
+- **Annotations** — 💬 button on each block to add comments/suggestions
+- **Block deletion** — ✕ button to remove sections, ↩ to restore
+- **Annotation sidebar** — 📌 button shows all annotations in one panel
+- **Ctrl+S** — quick save at any time
+- **Visual blocks** — content split into manageable cards
+
+```bash
+python3 review_editor.py --file "editing/[file].md" --title "[Section Title]"
+```
+
+**Method B: 📝 Terminal Editor** — `edit_content.py`
+Opens content in your system editor (VS Code, nano, vim, etc.).
+
+```bash
+python3 edit_content.py --title "[Title]" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/[file].md"
 ```
 
 ### ⛔ Eight Editing Touch Points:
@@ -170,11 +193,12 @@ After each edit, the AI MUST Read the file back and adapt all subsequent content
 
 > ✏️ **Interactive Edit — [Section Name]**
 >
-> I've saved the draft to `editing/[file].md`. Edit as needed:
-> - **Direct**: Open the file on your computer, edit, save, tell me when done.
-> - **GUI**: `python3 edit_content.py --title "[Title]" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/[file].md"`
+> I've saved the draft to `editing/[file].md`. A browser editor should open automatically.
 >
-> I'll read your revised version and continue.
+> **Browser**: `python3 review_editor.py --title "[Title]" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/[file].md"`
+> **Terminal**: `python3 edit_content.py --title "[Title]" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/[file].md"`
+>
+> Tell me when you've finished editing, and I'll read your revised version and continue.
 
 ---
 
@@ -298,9 +322,11 @@ Template: *"This review examines [topic/focus], focusing on [scope]. It aims to 
 After the draft is assembled, AI writes to `editing/topic_statement.md` and MUST prompt:
 
 > ✏️ **Interactive Edit — Topic Statement**
-> File: `editing/topic_statement.md`
-> WSL: `python3 edit_content.py --title "Topic Statement" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/topic_statement.md"`
-> Edit wording, scope, or emphasis. I'll read your revised version and continue.
+>
+> **Browser** (recommended): `python3 review_editor.py --title "Topic Statement" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/topic_statement.md"`
+> **Terminal**: `python3 edit_content.py --title "Topic Statement" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/topic_statement.md"`
+>
+> Edit wording, scope, or emphasis in the rich editor, then click Save & Close. I'll read your revised version and continue.
 
 After user confirms, Read the file back and use revised statement.
 
@@ -414,10 +440,10 @@ After assembling the outline (section titles, sub-themes, key points per section
 >
 > I've drafted the review outline based on your chosen organizational scheme and identified themes. This is the blueprint for the entire review — getting it right now saves massive rewriting later.
 >
-> **File**: `editing/outline.md`
-> **WSL**: `python3 edit_content.py --title "Review Outline" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/outline.md"`
+> **Browser** (recommended): `python3 review_editor.py --title "Review Outline" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/outline.md"`
+> **Terminal**: `python3 edit_content.py --title "Review Outline" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/outline.md"`
 >
-> Check: section order, sub-theme groupings, whether any important themes are missing, thesis statement placement. Rearrange, add, or remove sections as needed.
+> Check: section order, sub-theme groupings, whether any important themes are missing, thesis statement placement. Rearrange, add, or remove sections using the rich editor, then click Save & Close.
 
 After user confirms, Read the file back. The revised outline becomes the mandatory structure for all subsequent writing.
 
@@ -438,19 +464,29 @@ After EACH section, AI writes to file, prompts user to edit, reads back revised 
 ---
 
 **TP-3 — Thematic Section 1**:
-> ✏️ File: `editing/section_1.md` | WSL: `python3 edit_content.py --title "Section 1" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/section_1.md"`
+> ✏️ **Interactive Edit — Section 1**
+> **Browser**: `python3 review_editor.py --title "Section 1" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/section_1.md"`
+> **Terminal**: `python3 edit_content.py --title "Section 1" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/section_1.md"`
 
 **TP-4 — Thematic Section 2** (and 3+):
-> ✏️ File: `editing/section_2.md` | Same pattern.
+> ✏️ **Interactive Edit — Section 2**
+> **Browser**: `python3 review_editor.py --title "Section 2" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/section_2.md"`
+> **Terminal**: `python3 edit_content.py --title "Section 2" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/section_2.md"`
 
 **TP-5 — Cross-Theme Synthesis**:
-> ✏️ File: `editing/cross_theme.md` | WSL: `python3 edit_content.py --title "Cross-Theme" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/cross_theme.md"`
+> ✏️ **Interactive Edit — Cross-Theme Synthesis**
+> **Browser**: `python3 review_editor.py --title "Cross-Theme Synthesis" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/cross_theme.md"`
+> **Terminal**: `python3 edit_content.py --title "Cross-Theme" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/cross_theme.md"`
 
 **TP-6 — Conclusion**:
-> ✏️ File: `editing/conclusion.md` | WSL: `python3 edit_content.py --title "Conclusion" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/conclusion.md"`
+> ✏️ **Interactive Edit — Conclusion**
+> **Browser**: `python3 review_editor.py --title "Conclusion" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/conclusion.md"`
+> **Terminal**: `python3 edit_content.py --title "Conclusion" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/conclusion.md"`
 
 **TP-7 — Introduction** (written last):
-> ✏️ File: `editing/introduction.md` | WSL: `python3 edit_content.py --title "Introduction" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/introduction.md"`
+> ✏️ **Interactive Edit — Introduction**
+> **Browser**: `python3 review_editor.py --title "Introduction" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/introduction.md"`
+> **Terminal**: `python3 edit_content.py --title "Introduction" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/introduction.md"`
 
 ---
 
@@ -483,9 +519,9 @@ Three rounds: Macro → Meso → Micro. AskUserQuestion.
 ### Phase C: Refine Final Title — ⛔ TP-8
 
 > ✏️ **Interactive Edit — Title Candidates**
-> File: `editing/title_candidates.md`
-> WSL: `python3 edit_content.py --title "Title Candidates" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/title_candidates.md"`
-> 3 candidates drafted. Edit, merge, or rewrite. I'll use your final choice.
+> **Browser**: `python3 review_editor.py --title "Title Candidates" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/title_candidates.md"`
+> **Terminal**: `python3 edit_content.py --title "Title Candidates" --file "/mnt/c/Users/zdj/Desktop/research/溶瘤病毒综述/editing/title_candidates.md"`
+> 3 candidates drafted. Edit, merge, or rewrite in the rich editor. I'll use your final choice.
 
 Run 7-item title checklist after.
 

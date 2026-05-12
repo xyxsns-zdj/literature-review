@@ -11,10 +11,14 @@
     "pubmed-search",
     "web-of-science-search",
     "citation-verification",
-    "peer-review"
+    "peer-review",
+    "web-editor",
+    "annotation"
   ],
   "scripts": {
     "search": "python3 sci_lib/sci_search.py",
-    "zotero": "python3 sci_lib/zotero.py"
+    "zotero": "python3 sci_lib/zotero.py",
+    "review-editor": "python3 review_editor.py",
+    "edit-content": "python3 edit_content.py"
   }
 }
